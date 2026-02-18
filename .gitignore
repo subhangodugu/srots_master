@@ -1,0 +1,49 @@
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+.settings/
+.project
+.classpath
+.factorypath
+.springBeans
+
+# Logs
+logs/
+*.log
+build_output.txt
+build_output_utf8.txt
+full_debug.log
+startup.log
+
+# Database
+DBSchema/*.sql.bak
+
+# OS
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# App specific
+uploads/
+srots-backend/uploads/
