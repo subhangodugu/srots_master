@@ -61,6 +61,13 @@ public class UserAccountController {
         return ResponseEntity.ok(userService.create(dto, "STUDENT"));
     }
 
+    @PostMapping("/staff")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SROTS_DEV') or (hasRole('CPH') and principal.isCollegeHead)")
+    public ResponseEntity<?> createStaffAccount(
+            @org.springframework.web.bind.annotation.RequestBody UserCreateRequest dto) {
+        return ResponseEntity.ok(userService.create(dto, "STAFF"));
+    }
+
     /**
      * RESEND CREDENTIALS: Only accessible by SROTS (ADMIN/DEV) or College Heads
      * (CPH).
