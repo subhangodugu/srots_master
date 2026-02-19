@@ -391,7 +391,7 @@ export const StudentService = {
   },
 
   getExpiringStudents: async (collegeId: string) => {
-    const response = await api.get('/students/expiring', { params: { collegeId } });
+    const response = await api.get('/accounts/expiring', { params: { collegeId } });
     return response.data;
   },
 
@@ -426,7 +426,7 @@ export const StudentService = {
   },
 
   getAccountStats: async (collegeId: string) => {
-    const response = await api.get('/students/stats', { params: { collegeId } });
+    const response = await api.get('/accounts/stats', { params: { collegeId } });
     return response.data;
   },
 

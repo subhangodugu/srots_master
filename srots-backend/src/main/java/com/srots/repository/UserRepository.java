@@ -35,6 +35,9 @@ public interface UserRepository extends JpaRepository<User, String> {
 
 	List<User> findByCollegeIdAndRole(String collegeId, User.Role role);
 
+	@Query("SELECT u FROM User u LEFT JOIN FETCH u.studentProfile LEFT JOIN FETCH u.educationRecords WHERE u.college.id = :cid AND u.role = :role")
+	List<User> findByCollegeIdAndRoleWithProfile(@Param("cid") String collegeId, @Param("role") User.Role role);
+
 	// long countByCollegeIdAndRole(String collegeId, User.Role role);
 
 	long countByCollegeIdAndRole(String collegeId, User.Role role);

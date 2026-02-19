@@ -15,6 +15,7 @@ export const AnalyticsDashboard: React.FC = () => {
     useEffect(() => {
         AnalyticsService.getOverview()
             .then((res: any) => {
+                console.log("Overview API Response:", res); // STEP 1: ADD THIS
                 setData(res);
                 setLoading(false);
             })
@@ -25,6 +26,27 @@ export const AnalyticsDashboard: React.FC = () => {
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading analytics...</div>;
     if (!data) return <div className="p-8 text-center text-red-500">Failed to load analytics data.</div>;
+
+    // STEP 3: Fix Mapping in Frontend
+    const progressDataMapped =
+        data.placementProgress?.map((item: any) => ({
+            name: item.name || item.month,          // handle both
+            placed: item.placed || item.studentsPlaced || 0
+        })) || [];
+
+    // STEP 5: Verify Branch Chart Format
+    const branchMapped =
+        data.branchDistribution?.map((b: any) => ({
+            name: b.name || b.branch,
+            count: b.count || b.students || 0
+        })) || [];
+
+    // STEP 8: Fix Job Type Pie "Unknown"
+    const jobTypeMapped =
+        data.jobTypes?.map((j: any) => ({
+            name: j.name || j.jobType || "Unknown",
+            value: j.value || j.count || 0
+        })) || [];
 
     const stats = data.stats || { placedStudents: 0, totalStudents: 0, activeJobs: 0, companiesVisited: 0 };
 
@@ -56,14 +78,14 @@ export const AnalyticsDashboard: React.FC = () => {
 
             {/* Charts Row 1 */}
             <AnalyticsChartsRow
-                branchData={data.branchDistribution}
-                progressData={data.placementProgress}
+                branchData={branchMapped}
+                progressData={progressDataMapped}
             />
 
             {/* Charts Row 2 */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <AnalyticsRecentJobs jobs={data.recentJobs} />
-                <AnalyticsJobTypePie data={data.jobTypes} colors={COLORS} />
+                <AnalyticsJobTypePie data={jobTypeMapped} colors={COLORS} />
             </div>
         </div>
     );

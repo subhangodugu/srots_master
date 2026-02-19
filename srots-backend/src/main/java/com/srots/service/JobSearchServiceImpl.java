@@ -187,111 +187,129 @@ public class JobSearchServiceImpl implements JobSearchService {
 		List<Job> allJobs = jobRepo.findByCollegeId(collegeId);
 
 		return allJobs.stream()
-				.map(job -> getStudentJobStatus(job.getId(), studentId))
+				.map(job -> {
+					try {
+						return getStudentJobStatus(job.getId(), studentId);
+					} catch (Exception e) {
+						System.err.println(
+								"Error processing job eligibility for job " + job.getId() + ": " + e.getMessage());
+						e.printStackTrace();
+						return null;
+					}
+				})
+				.filter(java.util.Objects::nonNull)
 				.filter(dto -> {
+					try {
+						// ═══════════════════════════════════════════════════════
+						// FILTER 1: Search Query
+						// ═══════════════════════════════════════════════════════
+						if (searchQuery != null && !searchQuery.isBlank()) {
+							String query = searchQuery.toLowerCase().trim();
 
-					// ═══════════════════════════════════════════════════════
-					// FILTER 1: Search Query
-					// ═══════════════════════════════════════════════════════
-					if (searchQuery != null && !searchQuery.isBlank()) {
-						String query = searchQuery.toLowerCase().trim();
+							String title = dto.getJob().getTitle() != null
+									? dto.getJob().getTitle().toLowerCase()
+									: "";
+							String company = dto.getJob().getCompanyName() != null
+									? dto.getJob().getCompanyName().toLowerCase()
+									: "";
+							String postedBy = (dto.getJob().getPostedBy() != null
+									&& dto.getJob().getPostedBy().getFullName() != null)
+											? dto.getJob().getPostedBy().getFullName().toLowerCase()
+											: "";
 
-						String title = dto.getJob().getTitle() != null
-								? dto.getJob().getTitle().toLowerCase()
-								: "";
-						String company = dto.getJob().getCompanyName() != null
-								? dto.getJob().getCompanyName().toLowerCase()
-								: "";
-						String postedBy = (dto.getJob().getPostedBy() != null
-								&& dto.getJob().getPostedBy().getFullName() != null)
-										? dto.getJob().getPostedBy().getFullName().toLowerCase()
-										: "";
+							boolean matchesQuery = title.contains(query) ||
+									company.contains(query) ||
+									postedBy.contains(query);
 
-						boolean matchesQuery = title.contains(query) ||
-								company.contains(query) ||
-								postedBy.contains(query);
+							if (!matchesQuery)
+								return false;
+						}
 
-						if (!matchesQuery)
-							return false;
-					}
-
-					// ═══════════════════════════════════════════════════════
-					// FILTER 2: Job Type (Full-Time, Internship, Part-Time)
-					// ═══════════════════════════════════════════════════════
-					if (jobTypeFilters != null && !jobTypeFilters.isEmpty()) {
-						var jobInfo = dto.getJob();
-						if (jobInfo == null || jobInfo.getType() == null)
-							return false;
-
-						Job.JobType currentEnum = jobInfo.getType();
-						String name = currentEnum.name(); // "Full_Time"
-						String display = currentEnum.getDisplay(); // "Full Time"
-
-						boolean matches = jobTypeFilters.stream().anyMatch(filter -> {
-							if (filter == null || filter.isBlank())
+						// ═══════════════════════════════════════════════════════
+						// FILTER 2: Job Type (Full-Time, Internship, Part-Time)
+						// ═══════════════════════════════════════════════════════
+						if (jobTypeFilters != null && !jobTypeFilters.isEmpty()) {
+							var jobInfo = dto.getJob();
+							if (jobInfo == null || jobInfo.getType() == null)
 								return false;
 
-							String cleanFilter = filter.trim().toLowerCase()
-									.replace(" ", "").replace("_", "").replace("-", "");
-							String cleanName = name.toLowerCase().replace("_", "");
-							String cleanDisplay = display.toLowerCase().replace(" ", "");
+							Job.JobType currentEnum = jobInfo.getType();
+							String name = currentEnum.name(); // "Full_Time"
+							String display = currentEnum.getDisplay(); // "Full Time"
 
-							return cleanFilter.equals(cleanName) || cleanFilter.equals(cleanDisplay);
-						});
+							boolean matches = jobTypeFilters.stream().anyMatch(filter -> {
+								if (filter == null || filter.isBlank())
+									return false;
 
-						if (!matches)
-							return false;
-					}
+								String cleanFilter = filter.trim().toLowerCase()
+										.replace(" ", "").replace("_", "").replace("-", "");
+								String cleanName = name.toLowerCase().replace("_", "");
+								String cleanDisplay = display.toLowerCase().replace(" ", "");
 
-					// ═══════════════════════════════════════════════════════
-					// FILTER 3: Work Mode (Remote, Hybrid, On-Site)
-					// ═══════════════════════════════════════════════════════
-					if (workModeFilters != null && !workModeFilters.isEmpty()) {
-						boolean match = workModeFilters.stream()
-								.anyMatch(f -> Job.WorkMode.fromString(f) == dto.getJob().getMode());
-						if (!match)
-							return false;
-					}
+								return cleanFilter.equals(cleanName) || cleanFilter.equals(cleanDisplay);
+							});
 
-					// ═══════════════════════════════════════════════════════
-					// FILTER 4: Job Status (Active, Closed, Draft)
-					// ═══════════════════════════════════════════════════════
-					if (statusFilters != null && !statusFilters.isEmpty()) {
-						boolean match = statusFilters.stream().anyMatch(f -> {
-							try {
-								return Job.JobStatus.valueOf(f) == dto.getJob().getStatus();
-							} catch (Exception e) {
+							if (!matches)
 								return false;
-							}
-						});
-						if (!match)
-							return false;
+						}
+
+						// ═══════════════════════════════════════════════════════
+						// FILTER 3: Work Mode (Remote, Hybrid, On-Site)
+						// ═══════════════════════════════════════════════════════
+						if (workModeFilters != null && !workModeFilters.isEmpty()) {
+							if (dto.getJob().getMode() == null)
+								return false;
+							boolean match = workModeFilters.stream()
+									.anyMatch(f -> Job.WorkMode.fromString(f) == dto.getJob().getMode());
+							if (!match)
+								return false;
+						}
+
+						// ═══════════════════════════════════════════════════════
+						// FILTER 4: Job Status (Active, Closed, Draft)
+						// ═══════════════════════════════════════════════════════
+						if (statusFilters != null && !statusFilters.isEmpty()) {
+							if (dto.getJob().getStatus() == null)
+								return false;
+							boolean match = statusFilters.stream().anyMatch(f -> {
+								try {
+									return Job.JobStatus.valueOf(f) == dto.getJob().getStatus();
+								} catch (Exception e) {
+									return false;
+								}
+							});
+							if (!match)
+								return false;
+						}
+
+						// ═══════════════════════════════════════════════════════
+						// FILTER 5: Main Tab Filter (LAST - after all other filters)
+						// ═══════════════════════════════════════════════════════
+						String type = (filterType == null) ? "all" : filterType.toLowerCase();
+
+						return switch (type) {
+							// All jobs (eligible + non-eligible, applied + not applied)
+							case "all" -> true;
+
+							// For You = All eligible jobs (applied + not applied)
+							case "for_you" -> dto.isEligible();
+
+							// Applied = Eligible AND already applied
+							case "applied" -> dto.isEligible() && dto.isApplied();
+
+							// Not Applied = Eligible BUT not yet applied AND not expired
+							case "not_applied" -> dto.isEligible() && !dto.isApplied() && !dto.isExpired();
+
+							// Expired = Eligible AND not applied AND deadline passed
+							case "expired" -> dto.isEligible() && !dto.isApplied() && dto.isExpired();
+
+							// Default: show all
+							default -> true;
+						};
+					} catch (Exception e) {
+						System.err.println("Error filtering job " + dto.getJob().getId() + ": " + e.getMessage());
+						return false;
 					}
-
-					// ═══════════════════════════════════════════════════════
-					// FILTER 5: Main Tab Filter (LAST - after all other filters)
-					// ═══════════════════════════════════════════════════════
-					String type = (filterType == null) ? "all" : filterType.toLowerCase();
-
-					return switch (type) {
-						// All jobs (eligible + non-eligible, applied + not applied)
-						case "all" -> true;
-
-						// For You = All eligible jobs (applied + not applied)
-						case "for_you" -> dto.isEligible();
-
-						// Applied = Eligible AND already applied
-						case "applied" -> dto.isEligible() && dto.isApplied();
-
-						// Not Applied = Eligible BUT not yet applied AND not expired
-						case "not_applied" -> dto.isEligible() && !dto.isApplied() && !dto.isExpired();
-
-						// Expired = Eligible AND not applied AND deadline passed
-						case "expired" -> dto.isEligible() && !dto.isApplied() && dto.isExpired();
-
-						// Default: show all
-						default -> true;
-					};
 				})
 				.collect(Collectors.toList());
 	}
@@ -329,10 +347,15 @@ public class JobSearchServiceImpl implements JobSearchService {
 			try {
 				List<String> batches = mapper.readValue(job.getEligibleBatches(), new TypeReference<List<String>>() {
 				});
-				String sBatch = String.valueOf(student.getStudentProfile().getBatch());
-				if (!batches.contains(sBatch)) {
+				if (student.getStudentProfile().getBatch() != null) {
+					String sBatch = String.valueOf(student.getStudentProfile().getBatch());
+					if (!batches.contains(sBatch)) {
+						eligible = false;
+						reason.append("Batch mismatch. ");
+					}
+				} else {
 					eligible = false;
-					reason.append("Batch mismatch. ");
+					reason.append("Student Batch info missing. ");
 				}
 			} catch (Exception e) {
 				/* ignore */ }
@@ -345,10 +368,15 @@ public class JobSearchServiceImpl implements JobSearchService {
 						new TypeReference<List<String>>() {
 						});
 				String studentBranch = student.getStudentProfile().getBranch();
-				boolean branchMatch = allowedBranches.stream().anyMatch(b -> b.equalsIgnoreCase(studentBranch));
-				if (!branchMatch) {
+				if (studentBranch != null) {
+					boolean branchMatch = allowedBranches.stream().anyMatch(b -> b.equalsIgnoreCase(studentBranch));
+					if (!branchMatch) {
+						eligible = false;
+						reason.append("Branch not eligible. ");
+					}
+				} else {
 					eligible = false;
-					reason.append("Branch not eligible. ");
+					reason.append("Student Branch info missing. ");
 				}
 			} catch (Exception e) {
 				/* ignore */ }

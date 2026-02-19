@@ -33,12 +33,12 @@ export const AnalyticsRecentJobs: React.FC<AnalyticsRecentJobsProps> = ({ jobs }
                     <tbody className="divide-y divide-gray-100">
                         {validJobs.map(job => (
                             <tr key={job.id} className="hover:bg-gray-50">
-                                <td className="px-4 py-3 font-bold text-gray-800">{job.company || 'N/A'}</td>
+                                <td className="px-4 py-3 font-bold text-gray-800">{job.company?.name || job.companyName || 'N/A'}</td>
                                 <td className="px-4 py-3 text-gray-500">{job.title || 'Untitled'}</td>
                                 <td className="px-4 py-3 text-gray-500">{job.postedAt || '-'}</td>
                                 <td className="px-4 py-3">
                                     <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold">
-                                        {job.applicants?.length || 0}
+                                        {job.applications?.length || job.applicants || 0}
                                     </span>
                                 </td>
                             </tr>

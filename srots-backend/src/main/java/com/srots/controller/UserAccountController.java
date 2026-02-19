@@ -325,6 +325,20 @@ public class UserAccountController {
         return createReportResponse(report, collegeName + "_Students", format);
     }
 
+    // --- NEW: Expiring Students Endpoint ---
+    @GetMapping("/expiring")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SROTS_DEV', 'CPH', 'STAFF')")
+    public ResponseEntity<?> getExpiringStudents(@RequestParam String collegeId) {
+        return ResponseEntity.ok(userService.getExpiringStudents(collegeId));
+    }
+
+    // --- NEW: Account Stats Endpoint ---
+    @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SROTS_DEV', 'CPH', 'STAFF')")
+    public ResponseEntity<?> getAccountStats(@RequestParam String collegeId) {
+        return ResponseEntity.ok(userService.getAccountStats(collegeId));
+    }
+
     private ResponseEntity<byte[]> createReportResponse(byte[] data, String fileName, String format) {
         String extension = "excel".equalsIgnoreCase(format) ? ".xlsx" : ".csv";
 

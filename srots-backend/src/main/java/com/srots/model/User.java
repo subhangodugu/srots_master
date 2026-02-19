@@ -30,128 +30,129 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity 
+@Entity
 @Table(name = "users")
-@Getter @Setter 
-@NoArgsConstructor 
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    @Id 
-    @Column(length = 100)
-    private String id; 
-    
-    @Column(unique = true, nullable = false)
-    private String username;
-    
-    @Column(nullable = false, unique = true)
-    private String email;
+	@Id
+	@Column(length = 100)
+	private String id;
 
-    @JsonIgnore // CRITICAL: Keep this for security
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+	@Column(unique = true, nullable = false)
+	private String username;
 
-    @Column(nullable = false)
-    private String fullName;
+	@Column(nullable = false, unique = true)
+	private String email;
 
-    @Enumerated(EnumType.STRING) 
-    @Column(nullable = false)
-    private Role role;
+	@JsonIgnore // CRITICAL: Keep this for security
+	@Column(name = "password_hash", nullable = false)
+	private String passwordHash;
 
-    public enum Role { ADMIN, SROTS_DEV, CPH, STAFF, STUDENT }
-    
-    @JsonProperty("collegeId") // This adds a new field "collegeId" to your JSON
-    public String getCollegeIdOnly() {
-        return (college != null) ? college.getId() : null;
-    }
+	@Column(nullable = false)
+	private String fullName;
 
-    @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "college_id")
-    @JsonIgnoreProperties({
-        "hibernateLazyInitializer", 
-        "handler", 
-        "users",     // CRITICAL: Stop the college from listing all its users again
-        "jobs",      // Stop the college from listing all its jobs again
-        "posts"
-    })
-    private College college;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Role role;
 
-    private Boolean isRestricted = false;
-    private Boolean isCollegeHead = false;
+	public enum Role {
+		ADMIN, SROTS_DEV, CPH, STAFF, STUDENT
+	}
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-//    @JsonManagedReference
-    @JsonIgnore
-    private StudentProfile studentProfile;
+	@JsonProperty("collegeId") // This adds a new field "collegeId" to your JSON
+	public String getCollegeIdOnly() {
+		return (college != null) ? college.getId() : null;
+	}
 
-    @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "parent_user_id")
-    @JsonIgnore 
-    private User parentUser;
-    
-    private String experience;
-    private String education;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "college_id")
+	@JsonIgnoreProperties({
+			"hibernateLazyInitializer",
+			"handler",
+			"users", // CRITICAL: Stop the college from listing all its users again
+			"jobs", // Stop the college from listing all its jobs again
+			"posts"
+	})
+	private College college;
 
-    private String avatarUrl;
-    private String phone;
-    private String alternativeEmail;
-    private String alternativePhone;
-    private String aadhaarNumber;
+	private Boolean isRestricted = false;
+	private Boolean isCollegeHead = false;
 
-    @Column(columnDefinition = "TEXT")
-    private String bio;
-    
-    private String department;
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+	@com.fasterxml.jackson.annotation.JsonManagedReference
+	private StudentProfile studentProfile;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    private String addressJson;
-    
-    //used for the change password when user forget passsword
-    private String resetToken;
-    private LocalDateTime tokenExpiry;
-    
- // Add this to User.java
-    private String lastDeviceInfo;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "parent_user_id")
+	@JsonIgnore
+	private User parentUser;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-    
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-    
-    
- // ... inside User class ...
+	private String experience;
+	private String education;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true) // Add orphanRemoval
-    @JsonIgnoreProperties("student")
-    private List<EducationRecord> educationRecords = new ArrayList<>();
+	private String avatarUrl;
+	private String phone;
+	private String alternativeEmail;
+	private String alternativePhone;
+	private String aadhaarNumber;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("student")
-    private List<StudentExperience> experiences = new ArrayList<>();
+	@Column(columnDefinition = "TEXT")
+	private String bio;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("student")
-    private List<StudentProject> projects = new ArrayList<>();
+	private String department;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("student")
-    private List<StudentCertification> certifications = new ArrayList<>();
+	@JdbcTypeCode(SqlTypes.JSON)
+	private String addressJson;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("student")
-    private List<StudentLanguage> languages = new ArrayList<>();
+	// used for the change password when user forget passsword
+	private String resetToken;
+	private LocalDateTime tokenExpiry;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("student")
-    private List<StudentSocialLink> socialLinks = new ArrayList<>();
+	// Add this to User.java
+	private String lastDeviceInfo;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("student")
-    private List<StudentResume> resumes = new ArrayList<>();
+	@CreationTimestamp
+	private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("student")
-    private List<StudentSkill> skills = new ArrayList<>();
+	@UpdateTimestamp
+	private LocalDateTime updatedAt;
+
+	// ... inside User class ...
+
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true) // Add orphanRemoval
+	@JsonIgnoreProperties("student")
+	private List<EducationRecord> educationRecords = new ArrayList<>();
+
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnoreProperties("student")
+	private List<StudentExperience> experiences = new ArrayList<>();
+
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnoreProperties("student")
+	private List<StudentProject> projects = new ArrayList<>();
+
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnoreProperties("student")
+	private List<StudentCertification> certifications = new ArrayList<>();
+
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnoreProperties("student")
+	private List<StudentLanguage> languages = new ArrayList<>();
+
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnoreProperties("student")
+	private List<StudentSocialLink> socialLinks = new ArrayList<>();
+
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnoreProperties("student")
+	private List<StudentResume> resumes = new ArrayList<>();
+
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnoreProperties("student")
+	private List<StudentSkill> skills = new ArrayList<>();
 
 	public String getId() {
 		return id;
@@ -424,6 +425,5 @@ public class User {
 	public void setLastDeviceInfo(String lastDeviceInfo) {
 		this.lastDeviceInfo = lastDeviceInfo;
 	}
-	
-	
+
 }

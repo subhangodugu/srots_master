@@ -34,23 +34,23 @@
 //   avatar?: string;               // DB: avatar_url
 //   createdAt?: string;            // DB: created_at
 //   updatedAt?: string;            // DB: updated_at
-  
+
 //   // Security & Flags
 //   isRestricted?: boolean;        // DB: is_restricted
 //   isCollegeHead?: boolean;       // DB: is_college_head
-  
+
 //   // Contact
 //   phone?: string;                // DB: phone
 //   alternativeEmail?: string;     // DB: alternative_email
 //   alternativePhone?: string;     // DB: alternative_phone
-  
+
 //   // Personal / Professional
 //   aadhaarNumber?: string;        // DB: aadhaar_number
 //   bio?: string;                  // DB: bio
 //   department?: string;           // DB: department
 //   experience?: string;           // DB: experience
 //   education?: string;            // DB: education
-  
+
 //   // Address (parsed from addressJson)
 //   address?: AddressFormData | null;
 //   fullAddress?: string;          // derived / summary
@@ -244,12 +244,12 @@
 //   postedById: string;      // DB: 'posted_by_id'
 //   postedAt: string;        // DB: 'posted_at'
 //   applicationDeadline: string; // DB: 'application_deadline'
-  
+
 //   eligibility: any;        // DB: 'eligibility_json'
 //   rounds: any[];           // DB: 'rounds_json'
 //   studentStatus: Record<string, string>; // DB: 'student_status_json'
 //   documents: {name: string, url: string}[]; // DB: 'documents_json'
-  
+
 //   // UI helper fields
 //   responsibilities: string[];
 //   qualifications: string[];
@@ -336,7 +336,7 @@
 //   targetBranches?: string[]; // DB: 'target_branches_json'
 //   postedBy?: string;     // DB: 'posted_by'
 //   createdById?: string;  // DB: 'created_by_id'
-  
+
 //   endDate?: string;
 //   description?: string;
 //   schedule?: ScheduleItem[]; // Updated to use ScheduleItem interface
@@ -478,7 +478,7 @@ export interface StudentProfile {
   branch: string;
   course: string;
   batch: number;
-  placementCycle: string; 
+  placementCycle: string;
   careerPath: string;
   gender: string;
   dob: string;
@@ -536,14 +536,14 @@ export interface Student extends User {
 }
 
 export interface Branch {
-  name: string; 
-  code: string; 
+  name: string;
+  code: string;
 }
 
 export interface CollegeAboutSection {
-  id: string; 
-  title: string; 
-  content: string; 
+  id: string;
+  title: string;
+  content: string;
   image?: string;
   lastModifiedBy?: string;
   lastModifiedAt?: string;
@@ -571,8 +571,8 @@ export interface College {
 }
 
 export interface BranchDTO {
-    name: string;
-    code: string;
+  name: string;
+  code: string;
 }
 
 export type MarkFormat = 'Percentage' | 'CGPA' | 'Grade' | 'Marks';
@@ -584,41 +584,43 @@ export type MarkFormat = 'Percentage' | 'CGPA' | 'Grade' | 'Marks';
 export interface Job {
   id: string;
   collegeId?: string;
-  
+
   // Basic Info (matches backend exactly)
   title: string;
   companyName: string;          // Backend uses companyName, NOT company
   hiringDepartment?: string;
-  
+
   // Enums (backend sends display values like "Full Time", "Remote")
   jobType: string;              // "Full Time", "Internship", "Contract"
   workMode: string;             // "On-Site", "Remote", "Hybrid"
   status: 'Active' | 'Closed' | 'Draft';
-  
+
   location: string;
   salaryRange?: string;
   summary: string;
-  
+
   // JSON Arrays (backend sends as arrays, not JSON strings)
   responsibilitiesJson?: string[];
   qualificationsJson?: string[];
   preferredQualificationsJson?: string[];
   benefitsJson?: string[];
-  
+
   // Additional details
   companyCulture?: string;
   physicalDemands?: string;
   eeoStatement?: string;
   internalId?: string;
-  
+
   // Dates
   applicationDeadline: string;
   postedAt: string;
-  
+
   // Relations
   postedBy?: string;            // Staff/CPH name
   postedById?: string;
-  
+  company?: { id: string; name: string; logo?: string }; // Support object company
+  applications?: any[];         // Support applications array
+
   // Eligibility (backend sends these at root level)
   minUgScore?: number;
   formatUg?: string;
@@ -630,33 +632,33 @@ export interface Job {
   allowGaps?: boolean;
   maxGapYears?: number;
   isDiplomaEligible?: boolean;
-  
+
   // JSON strings from backend
   allowedBranches?: string;     // JSON string
   eligibleBatches?: string;     // JSON string
   roundsJson?: string;          // JSON string
   requiredFieldsJson?: string;  // JSON string
   attachmentsJson?: string;     // JSON string
-  
+
   // Parsed rounds for UI
   rounds?: any[];
-  
+
   // Documents (parsed from attachmentsJson)
-  documents?: {name: string, url: string}[];
-  
+  documents?: { name: string, url: string }[];
+
   externalLink?: string;
-  
+
   // UI helpers
   applicants?: string[];
   notInterested?: string[];
   studentStatus?: Record<string, string>;
   requiredStudentFields?: string[];
   negativeList?: string[];
-  
-  // DEPRECATED: These are old field names, kept for backward compatibility
-  company?: string;             // Maps to companyName
-  type?: string;                // Maps to jobType
-  workArrangement?: string;     // Maps to workMode
+
+  // DEPRECATED: These are old field names, removed to avoid conflicts
+  // company?: string;             // Maps to companyName
+  // type?: string;                // Maps to jobType
+  // workArrangement?: string;     // Maps to workMode
   eligibility?: any;            // Deprecated - fields now at root level
 }
 
@@ -664,16 +666,16 @@ export interface Job {
  * CRITICAL FIX: StudentJobView interface matching backend StudentJobViewDTO exactly
  */
 export interface StudentJobView {
-    job: Job;
-    
-    // Backend flags (exact names from StudentJobViewDTO)
-    isApplied: boolean;       // Backend: applied
-    isEligible: boolean;      // Backend: eligible
-    isExpired: boolean;       // Backend: expired
-    isNotInterested: boolean; // Backend: notInterested
-    
-    // Reason string
-    eligibilityReason?: string;  // Backend: reason or notEligibilityReason
+  job: Job;
+
+  // Backend flags (exact names from StudentJobViewDTO)
+  isApplied: boolean;       // Backend: applied
+  isEligible: boolean;      // Backend: eligible
+  isExpired: boolean;       // Backend: expired
+  isNotInterested: boolean; // Backend: notInterested
+
+  // Reason string
+  eligibilityReason?: string;  // Backend: reason or notEligibilityReason
 }
 
 export interface Post {
@@ -684,7 +686,7 @@ export interface Post {
   authorRole: Role;
   content: string;
   images: string[];
-  documents: {name: string, url: string}[];
+  documents: { name: string, url: string }[];
   likes: number;
   commentsCount: number;
   isLikedByMe: boolean;
@@ -721,16 +723,16 @@ export interface CalendarEvent {
   endDate?: string;
   description?: string;
   schedule?: ScheduleItem[];
-  createdAt?: string; 
+  createdAt?: string;
   targetYears?: number[];
   createdBy?: string;
 }
 
 export interface ScheduleItem {
-    id: string;
-    timeRange: string;
-    activity: string;
-    type: 'Class' | 'Break' | 'Exam' | 'Activity';
+  id: string;
+  timeRange: string;
+  activity: string;
+  type: 'Class' | 'Break' | 'Exam' | 'Activity';
 }
 
 export interface Notice {
@@ -763,14 +765,14 @@ export enum CourseStatus {
 }
 
 export interface DashboardMetrics {
-    stats: {
-        placedCount: number;
-        totalStudents: number;
-        activeJobs: number;
-        participatingCompanies: number;
-    };
-    branchDistribution: { name: string; count: number }[];
-    placementProgress: { name: string; placed: number }[];
-    jobTypeDistribution: { name: string; value: number }[];
-    recentJobs: Job[];
+  stats: {
+    placedCount: number;
+    totalStudents: number;
+    activeJobs: number;
+    participatingCompanies: number;
+  };
+  branchDistribution: { name: string; count: number }[];
+  placementProgress: { name: string; placed: number }[];
+  jobTypeDistribution: { name: string; value: number }[];
+  recentJobs: Job[];
 }

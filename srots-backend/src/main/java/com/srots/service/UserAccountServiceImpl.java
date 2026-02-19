@@ -510,32 +510,34 @@ public class UserAccountServiceImpl implements UserAccountService {
 		}
 
 		switch (role) {
-		case ADMIN:
-			return "ADMIN_" + userPart;
+			case ADMIN:
+				return "ADMIN_" + userPart;
 
-		case SROTS_DEV:
-			return "DEV_" + userPart;
+			case SROTS_DEV:
+				return "DEV_" + userPart;
 
-		case CPH:
-//			String prefix = (dto.getIsCollegeHead() != null && dto.getIsCollegeHead()) ? "CPADMIN_" : "CPSTAFF_";
-			String cpadmin = "CPADMIN_";
-			// Example: SRM_CPSTAFF_5544
-			return college.getCode() + "_" + cpadmin + userPart;
-		case STAFF:
-//			String prefix = (dto.getIsCollegeHead() != null && dto.getIsCollegeHead()) ? "CPADMIN_" : "CPSTAFF_";
-			String cpstaff = "CPSTAFF_";
-			// Example: SRM_CPSTAFF_5544
-			return college.getCode() + "_" + cpstaff + userPart;
+			case CPH:
+				// String prefix = (dto.getIsCollegeHead() != null && dto.getIsCollegeHead()) ?
+				// "CPADMIN_" : "CPSTAFF_";
+				String cpadmin = "CPADMIN_";
+				// Example: SRM_CPSTAFF_5544
+				return college.getCode() + "_" + cpadmin + userPart;
+			case STAFF:
+				// String prefix = (dto.getIsCollegeHead() != null && dto.getIsCollegeHead()) ?
+				// "CPADMIN_" : "CPSTAFF_";
+				String cpstaff = "CPSTAFF_";
+				// Example: SRM_CPSTAFF_5544
+				return college.getCode() + "_" + cpstaff + userPart;
 
-		case STUDENT:
-			if (dto.getStudentProfile() == null || dto.getStudentProfile().getRollNumber() == null) {
-				throw new RuntimeException("Roll Number is required for Student username generation.");
-			}
-			// Students always use Roll Number as the unique identifier
-			return college.getCode() + "_" + dto.getStudentProfile().getRollNumber();
+			case STUDENT:
+				if (dto.getStudentProfile() == null || dto.getStudentProfile().getRollNumber() == null) {
+					throw new RuntimeException("Roll Number is required for Student username generation.");
+				}
+				// Students always use Roll Number as the unique identifier
+				return college.getCode() + "_" + dto.getStudentProfile().getRollNumber();
 
-		default:
-			return userPart;
+			default:
+				return userPart;
 		}
 	}
 
@@ -583,17 +585,15 @@ public class UserAccountServiceImpl implements UserAccountService {
 	public User getById(String id) {
 		return userRepository.findById(id).orElse(null);
 	}
-	
-	
 
 	// 5. GET FULL PROFILE (The "Deep Fetch" method)
 	public UserFullProfileResponse getFullUserProfile(String userId) {
 		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-		
+
 		// Explicitly initialize the proxy if you aren't using @JsonIgnore
-	    if (user.getCollege() != null) {
-	        user.getCollege().getId(); 
-	    }
+		if (user.getCollege() != null) {
+			user.getCollege().getId();
+		}
 
 		UserFullProfileResponse response = new UserFullProfileResponse();
 		response.setUser(user);
@@ -616,11 +616,11 @@ public class UserAccountServiceImpl implements UserAccountService {
 		if (user.getRole() != User.Role.STUDENT) {
 			throw new RuntimeException("Access Denied: Not a student account");
 		}
-		
+
 		// Explicitly initialize the proxy if you aren't using @JsonIgnore
-	    if (user.getCollege() != null) {
-	        user.getCollege().getId(); 
-	    }
+		if (user.getCollege() != null) {
+			user.getCollege().getId();
+		}
 
 		Student360Response dto = new Student360Response();
 
@@ -650,55 +650,60 @@ public class UserAccountServiceImpl implements UserAccountService {
 		user.setAvatarUrl(url);
 		userRepository.save(user);
 	}
-	
+
 	// Add this to your UserService Implementation
-	public List<User> getFilteredUsers(String collegeId, User.Role role, String branch, Integer batch, String gender, String search) {
-	    List<User> users;
+	public List<User> getFilteredUsers(String collegeId, User.Role role, String branch, Integer batch, String gender,
+			String search) {
+		List<User> users;
 
-	    // 1. Initial Fetch (Global vs College)
-	    if (collegeId != null && role != null) {
-	        users = userRepository.findByCollegeIdAndRole(collegeId, role);
-	    } else if (collegeId != null) {
-	        users = userRepository.findByCollegeId(collegeId);
-	    } else if (role != null) {
-	        users = userRepository.findByRole(role);
-	    } else {
-	        users = userRepository.findAll();
-	    }
+		// 1. Initial Fetch (Global vs College)
+		if (collegeId != null && role != null) {
+			users = userRepository.findByCollegeIdAndRoleWithProfile(collegeId, role);
+		} else if (collegeId != null) {
+			users = userRepository.findByCollegeId(collegeId);
+		} else if (role != null) {
+			users = userRepository.findByRole(role);
+		} else {
+			users = userRepository.findAll();
+		}
 
-	    // 2. Apply Dynamic Filters
-	    return users.stream()
-	        .filter(u -> (branch == null || branch.isBlank()) || 
-	                     (u.getDepartment() != null && u.getDepartment().equalsIgnoreCase(branch.trim())))
-	        .filter(u -> {
-	            if (gender == null || gender.isBlank()) return true;
-	            return u.getStudentProfile() != null && u.getStudentProfile().getGender() != null && 
-	                   u.getStudentProfile().getGender().name().equalsIgnoreCase(gender.trim());
-	        })
-	        .filter(u -> (batch == null) || 
-	                     (u.getStudentProfile() != null && batch.equals(u.getStudentProfile().getBatch())))
-	        
-	        // --- UPDATED SEARCH FILTER (Name, Username, Email, Roll Number) ---
-	        .filter(u -> {
-	            if (search == null || search.isBlank()) return true;
-	            String lowerSearch = search.toLowerCase().trim();
-	            
-	            boolean matchesFullName = u.getFullName() != null && u.getFullName().toLowerCase().contains(lowerSearch);
-	            boolean matchesUsername = u.getUsername() != null && u.getUsername().toLowerCase().contains(lowerSearch);
-	            boolean matchesEmail    = u.getEmail() != null && u.getEmail().toLowerCase().contains(lowerSearch);
-	            boolean matchesRoll     = (u.getStudentProfile() != null && u.getStudentProfile().getRollNumber() != null) && 
-	                                      u.getStudentProfile().getRollNumber().toLowerCase().contains(lowerSearch);
-	            
-	            return matchesFullName || matchesUsername || matchesEmail || matchesRoll;
-	        })
-	        .collect(Collectors.toList());
+		// 2. Apply Dynamic Filters
+		return users.stream()
+				.filter(u -> (branch == null || branch.isBlank()) ||
+						(u.getDepartment() != null && u.getDepartment().equalsIgnoreCase(branch.trim())))
+				.filter(u -> {
+					if (gender == null || gender.isBlank())
+						return true;
+					return u.getStudentProfile() != null && u.getStudentProfile().getGender() != null &&
+							u.getStudentProfile().getGender().name().equalsIgnoreCase(gender.trim());
+				})
+				.filter(u -> (batch == null) ||
+						(u.getStudentProfile() != null && batch.equals(u.getStudentProfile().getBatch())))
+
+				// --- UPDATED SEARCH FILTER (Name, Username, Email, Roll Number) ---
+				.filter(u -> {
+					if (search == null || search.isBlank())
+						return true;
+					String lowerSearch = search.toLowerCase().trim();
+
+					boolean matchesFullName = u.getFullName() != null
+							&& u.getFullName().toLowerCase().contains(lowerSearch);
+					boolean matchesUsername = u.getUsername() != null
+							&& u.getUsername().toLowerCase().contains(lowerSearch);
+					boolean matchesEmail = u.getEmail() != null && u.getEmail().toLowerCase().contains(lowerSearch);
+					boolean matchesRoll = (u.getStudentProfile() != null
+							&& u.getStudentProfile().getRollNumber() != null) &&
+							u.getStudentProfile().getRollNumber().toLowerCase().contains(lowerSearch);
+
+					return matchesFullName || matchesUsername || matchesEmail || matchesRoll;
+				})
+				.collect(Collectors.toList());
 	}
 
 	// Missing Helper Method
 	public String getCollegeName(String collegeId) {
 		return collegeRepository.findById(collegeId).map(College::getName).orElse("College");
 	}
-	
 
 	@Override
 	public byte[] exportUsersByRole(String collegeId, User.Role role, String branch, Integer batch, String gender,
@@ -714,25 +719,30 @@ public class UserAccountServiceImpl implements UserAccountService {
 
 		// 2. Apply Dynamic Filters (Strict Version)
 		users = users.stream()
-		        .filter(u -> {
-		            if (branch == null || branch.isBlank()) return true;
-		            return u.getDepartment() != null && u.getDepartment().equalsIgnoreCase(branch.trim());
-		        })
-		        .filter(u -> {
-		            // If the variable 'gender' is null, it means the URL key was wrong (e.g., 'Gender')
-		            // or not provided. 
-		            if (gender == null || gender.isBlank()) return true;
-		            
-		            if (u.getStudentProfile() == null || u.getStudentProfile().getGender() == null) return false;
-		            
-		            // This is where Arjun gets blocked if gender="FEMALE"
-		            return u.getStudentProfile().getGender().name().equalsIgnoreCase(gender.trim());
-		        })
-		        .filter(u -> {
-		            if (batch == null) return true;
-		            return u.getStudentProfile() != null && batch.equals(u.getStudentProfile().getBatch());
-		        })
-		        .collect(Collectors.toList());
+				.filter(u -> {
+					if (branch == null || branch.isBlank())
+						return true;
+					return u.getDepartment() != null && u.getDepartment().equalsIgnoreCase(branch.trim());
+				})
+				.filter(u -> {
+					// If the variable 'gender' is null, it means the URL key was wrong (e.g.,
+					// 'Gender')
+					// or not provided.
+					if (gender == null || gender.isBlank())
+						return true;
+
+					if (u.getStudentProfile() == null || u.getStudentProfile().getGender() == null)
+						return false;
+
+					// This is where Arjun gets blocked if gender="FEMALE"
+					return u.getStudentProfile().getGender().name().equalsIgnoreCase(gender.trim());
+				})
+				.filter(u -> {
+					if (batch == null)
+						return true;
+					return u.getStudentProfile() != null && batch.equals(u.getStudentProfile().getBatch());
+				})
+				.collect(Collectors.toList());
 
 		// 3. Map to Report Rows
 		List<ReportRow> reportData = users.stream().map(user -> {
@@ -908,6 +918,92 @@ public class UserAccountServiceImpl implements UserAccountService {
 				+ "<p>If you believe this was a mistake, please contact your college administrator.</p>";
 
 		emailService.sendEmail(email, "SROTS Account Deleted", htmlContent);
+	}
+
+	@Override
+	public Object getExpiringStudents(String collegeId) {
+		// 1. Fetch all students for the college (using eager fetch)
+		List<User> students = userRepository.findByCollegeIdAndRoleWithProfile(collegeId, User.Role.STUDENT);
+
+		LocalDate today = LocalDate.now();
+		LocalDate warningThreshold = today.plusDays(30);
+
+		// 2. Filter & Map to DTO
+		return students.stream()
+				.filter(u -> {
+					StudentProfile sp = u.getStudentProfile();
+					// Safety: If profile or date is null, treat as valid to avoid crash, OR fix
+					// data
+					if (sp == null)
+						return false;
+
+					LocalDate end = sp.getPremiumEndDate();
+					// FIX: If null, assume fresh 18 months (or handle as per business logic)
+					if (end == null) {
+						// Option A: Skip
+						// return false;
+						// Option B: Auto-fix (as per user request step 10)
+						end = LocalDate.now().plusMonths(18);
+						sp.setPremiumEndDate(end); // Update in memory (optional: save to DB?)
+					}
+
+					// Condition: Expired OR Expiring Soon (<= 30 days)
+					return end.isBefore(warningThreshold);
+				})
+				.map(u -> {
+					StudentProfile sp = u.getStudentProfile();
+					LocalDate end = (sp.getPremiumEndDate() != null) ? sp.getPremiumEndDate()
+							: LocalDate.now().plusMonths(18);
+
+					long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(today, end);
+					String status = (daysRemaining < 0) ? "Expired" : "Expiring";
+
+					return Map.of(
+							"id", u.getId(),
+							"name", u.getFullName(),
+							"expiryIn", daysRemaining, // Can be negative
+							"status", status,
+							"premiumEnd", end.toString());
+				})
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Object getAccountStats(String collegeId) {
+		List<User> students = userRepository.findByCollegeIdAndRoleWithProfile(collegeId, User.Role.STUDENT);
+		LocalDate today = LocalDate.now();
+
+		long expiring = 0;
+		long grace = 0;
+		long toBeDeleted = 0;
+
+		for (User u : students) {
+			StudentProfile sp = u.getStudentProfile();
+			if (sp == null)
+				continue;
+
+			LocalDate end = sp.getPremiumEndDate();
+			if (end == null)
+				end = today.plusMonths(18); // Default safety
+
+			long daysDiff = java.time.temporal.ChronoUnit.DAYS.between(today, end);
+
+			if (daysDiff >= 0 && daysDiff <= 30) {
+				expiring++;
+			} else if (daysDiff < 0) {
+				// Grace period logic (e.g., -1 to -90 days is grace)
+				if (daysDiff >= -90) {
+					grace++;
+				} else {
+					toBeDeleted++;
+				}
+			}
+		}
+
+		return Map.of(
+				"expiring", expiring,
+				"grace", grace,
+				"toBeDeleted", toBeDeleted);
 	}
 
 }

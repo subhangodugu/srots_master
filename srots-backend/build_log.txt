@@ -1,0 +1,22 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.srots:srots-backend >-----------------------
+[INFO] Building srots-backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ srots-backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ srots-backend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 176 source files with javac [debug release 17] to target\classes
+[INFO] /C:/Users/subhan godugu/Downloads/srots-master/srots-master/srots-backend/src/main/java/com/srots/service/JobMapper.java: Some input files use unchecked or unsafe operations.
+[INFO] /C:/Users/subhan godugu/Downloads/srots-master/srots-master/srots-backend/src/main/java/com/srots/service/JobMapper.java: Recompile with -Xlint:unchecked for details.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.229 s
+[INFO] Finished at: 2026-02-19T15:57:21+05:30
+[INFO] ------------------------------------------------------------------------
