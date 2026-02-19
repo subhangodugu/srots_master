@@ -26,7 +26,7 @@ public class Application {
 	private AppStatus status = AppStatus.Applied;
 
 	public enum AppStatus {
-		Applied, Shortlisted, Rejected, Hired, Not_Interested, Offer_Released
+		Applied, Shortlisted, Rejected, PLACED, Not_Interested, Offer_Released
 	}
 
 	private String currentRoundStatus;
@@ -35,6 +35,8 @@ public class Application {
 
 	@CreationTimestamp
 	private LocalDateTime appliedAt;
+
+	private LocalDateTime placedAt;
 
 	@Enumerated(EnumType.STRING)
 	private AppliedBy appliedBy = AppliedBy.Self; // Default
@@ -142,8 +144,9 @@ public class Application {
 			app.setJob(this.job);
 			app.setStudent(this.student);
 			app.setStatus(this.status != null ? this.status : AppStatus.Applied);
-			app.setCurrentRoundStatus(this.currentRoundStatus);
-			app.setCurrentRound(this.currentRound);
+			if (this.status == AppStatus.PLACED && app.getPlacedAt() == null) {
+				app.setPlacedAt(LocalDateTime.now());
+			}
 			app.setAppliedBy(this.appliedby);
 			return app;
 		}
@@ -155,6 +158,14 @@ public class Application {
 
 	public void setCurrentRound(Integer currentRound) {
 		this.currentRound = currentRound;
+	}
+
+	public LocalDateTime getPlacedAt() {
+		return placedAt;
+	}
+
+	public void setPlacedAt(LocalDateTime placedAt) {
+		this.placedAt = placedAt;
 	}
 
 }

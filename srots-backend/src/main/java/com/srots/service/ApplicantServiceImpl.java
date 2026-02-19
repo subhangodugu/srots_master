@@ -138,7 +138,7 @@ public class ApplicantServiceImpl implements ApplicantService {
 			String status = extractStudentField(app.getStudent(), "currentstatus", job, holder);
 
 			// Stats Calculation
-			if ("Hired".equalsIgnoreCase(status))
+			if ("PLACED".equalsIgnoreCase(status))
 				hired++;
 			else if (status.toLowerCase().contains("rejected"))
 				rejected++;
@@ -160,7 +160,7 @@ public class ApplicantServiceImpl implements ApplicantService {
 			studentList.add(studentMap);
 		}
 
-		Map<String, Long> globalStats = Map.of("Hired", hired, "Rejected", rejected, "Pending", pending);
+		Map<String, Long> globalStats = Map.of("PLACED", hired, "Rejected", rejected, "Pending", pending);
 
 		return new JobApplicantsDashboardDTO(
 				job.getTitle(),
@@ -295,8 +295,8 @@ public class ApplicantServiceImpl implements ApplicantService {
 					app.setCurrentRound(roundIndex);
 					if (resultText.equalsIgnoreCase("Passed") || resultText.equalsIgnoreCase("Qualified")) {
 						if (roundIndex == rounds.size()) {
-							app.setCurrentRoundStatus("Hired");
-							app.setStatus(Application.AppStatus.Hired);
+							app.setCurrentRoundStatus("PLACED");
+							app.setStatus(Application.AppStatus.PLACED);
 						} else {
 							app.setCurrentRoundStatus(roundName + " Cleared");
 							app.setStatus(Application.AppStatus.Shortlisted);
@@ -338,7 +338,7 @@ public class ApplicantServiceImpl implements ApplicantService {
 			long passed = appRepo.countByJobIdAndCurrentRoundAndCurrentRoundStatusContaining(jobId, roundNum,
 					"Cleared");
 			if (roundNum == roundsList.size()) {
-				passed += appRepo.countByJobIdAndStatus(jobId, Application.AppStatus.Hired);
+				passed += appRepo.countByJobIdAndStatus(jobId, Application.AppStatus.PLACED);
 			}
 
 			long rejected = appRepo.countByJobIdAndCurrentRoundAndCurrentRoundStatusContaining(jobId, roundNum,
@@ -413,8 +413,8 @@ public class ApplicantServiceImpl implements ApplicantService {
 						app.getCurrentRoundStatus(),
 						app.getAppliedBy() != null ? app.getAppliedBy().name() : "Self"))
 				.sorted((a, b) -> {
-					boolean aHired = "Hired".equalsIgnoreCase(a.statusDetail);
-					boolean bHired = "Hired".equalsIgnoreCase(b.statusDetail);
+					boolean aHired = "PLACED".equalsIgnoreCase(a.statusDetail);
+					boolean bHired = "PLACED".equalsIgnoreCase(b.statusDetail);
 					if (aHired && !bHired)
 						return -1;
 					if (!aHired && bHired)
@@ -809,9 +809,9 @@ public class ApplicantServiceImpl implements ApplicantService {
 			Job job = app.getJob();
 
 			String displayStatus;
-			if (app.getStatus() == Application.AppStatus.Hired
-					|| "Hired".equalsIgnoreCase(app.getCurrentRoundStatus())) {
-				displayStatus = "🎉 Hired";
+			if (app.getStatus() == Application.AppStatus.PLACED
+					|| "PLACED".equalsIgnoreCase(app.getCurrentRoundStatus())) {
+				displayStatus = "🎉 PLACED";
 			} else {
 				displayStatus = (app.getCurrentRoundStatus() != null) ? app.getCurrentRoundStatus()
 						: app.getStatus().name().replace("_", " ");
@@ -844,8 +844,8 @@ public class ApplicantServiceImpl implements ApplicantService {
 		int studentCurrentRoundNum = (app.getCurrentRound() != null) ? app.getCurrentRound() : 1;
 		String currentStatusStr = app.getCurrentRoundStatus();
 		boolean hasFailed = (app.getStatus() == Application.AppStatus.Rejected);
-		boolean isHired = (app.getStatus() == Application.AppStatus.Hired
-				|| "Hired".equalsIgnoreCase(currentStatusStr));
+		boolean isHired = (app.getStatus() == Application.AppStatus.PLACED
+				|| "PLACED".equalsIgnoreCase(currentStatusStr));
 
 		// 2. Iterate through dynamic job rounds
 		for (int i = 0; i < rounds.size(); i++) {

@@ -34,7 +34,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**", "/login/**", "/api/v1/files/**", "/api/v1/jobs/**")
+                        .requestMatchers("/api/v1/auth/**", "/login/**", "/api/v1/files/**", "/api/v1/jobs/**",
+                                "/api/v1/analytics/**")
                         .permitAll()
                         // Ensure Preflight OPTIONS requests are always allowed
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
