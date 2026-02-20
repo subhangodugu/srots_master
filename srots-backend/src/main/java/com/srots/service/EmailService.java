@@ -13,7 +13,7 @@ import jakarta.mail.internet.MimeMessage;
 public class EmailService {
 
     private final JavaMailSender mailSender;
-    
+
     @Value("${spring.mail.username}")
     private String senderEmail;
 
@@ -27,17 +27,26 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            
+
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(body, true);
             helper.setFrom(senderEmail);
-            
-            mailSender.send(message); 
+
+            mailSender.send(message);
             // Logging helps verify it's running on the correct thread pool
             System.out.println("Email sent to: " + to + " via " + Thread.currentThread().getName());
         } catch (MessagingException e) {
             System.err.println("Async Email Error: " + e.getMessage());
         }
+    }
+
+    @Async("taskExecutor")
+    public void sendPremiumActivatedMail(String to, java.time.LocalDate expiryDate) {
+        String subject = "Premium Activated \u2705";
+        String body = "<h3>Premium Activated \u2705</h3>" +
+                "<p>Your premium is active until: <strong>" + expiryDate + "</strong></p>" +
+                "<p>Thank you for upgrading.</p>";
+        sendEmail(to, subject, body);
     }
 }

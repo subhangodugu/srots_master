@@ -14,6 +14,14 @@ public class Student {
     private String name;
     private String email;
 
+    @Column(nullable = false)
+    private boolean premiumActive = false;
+
+    private java.time.LocalDate premiumExpiryDate;
+
+    @Column(nullable = false)
+    private String accountStatus = "HOLD"; // \ud83d\udd12 default
+
     @Column(name = "college_id")
     private String collegeId;
 

@@ -107,26 +107,45 @@ export const ManageTeam: React.FC<ManageTeamProps> = ({ user }) => {
             setSubTPOs([...list]);
         }
     };
-    const handleSaveSubTPO = async (data: { id: string, name: string, email: string, phone: string, department: string, aadhaar: string, address: AddressFormData }) => {
-        if (isEditing && editingMember) {
-            const updatedUser: User = {
-                ...editingMember, fullName: data.name, email: data.email, phone: data.phone, department: data.department,
-                aadhaarNumber: data.aadhaar, id: data.id,
-            };
-            await CollegeService.updateCPStaff(updatedUser, data.address);
-        } else {
-            await CollegeService.createCPStaff({
-                id: data.id,
-                name: data.name,
-                email: data.email,
-                phone: data.phone,
-                department: data.department,
-                aadhaar: data.aadhaar,
-                address: data.address,
-                collegeId: user.collegeId
-            });
+    const handleSaveSubTPO = async (data: {
+        id: string, name: string, email: string,
+        phone: string, department: string,
+        aadhaar: string, address: AddressFormData
+    }) => {
+        try {
+            if (isEditing && editingMember) {
+                const updatedUser: User = {
+                    ...editingMember,
+                    fullName: data.name,
+                    email: data.email,
+                    phone: data.phone,
+                    department: data.department,
+                    aadhaarNumber: data.aadhaar,
+                    id: editingMember.id,
+                };
+                await CollegeService.updateCPStaff(updatedUser, data.address);
+            } else {
+                await CollegeService.createCPStaff({
+                    name: data.name,
+                    email: data.email,
+                    phone: data.phone,
+                    department: data.department,
+                    aadhaar: data.aadhaar,
+                    address: data.address,
+                    collegeId: user.collegeId
+                });
+            }
+            refreshList();
+            setShowModal(false);
+            setEditingMember(null);
+            setIsEditing(false);
+        } catch (err: any) {
+            const backendMsg = err?.response?.data?.message
+                || err?.response?.data
+                || err?.message
+                || "Unknown error";
+            alert("Failed: " + JSON.stringify(backendMsg));
         }
-        refreshList(); setShowModal(false); setEditingMember(null); setIsEditing(false);
     };
     const handleOpenEdit = (staff: User) => { setEditingMember(staff); setIsEditing(true); setShowModal(true); };
     const handleOpenCreate = () => { setEditingMember(null); setIsEditing(false); setShowModal(true); };

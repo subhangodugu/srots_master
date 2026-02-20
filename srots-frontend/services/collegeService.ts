@@ -441,14 +441,21 @@ export const CollegeService = {
 
   createCPStaff: async (data: any) => {
     const payload = {
-      username: data.id,
-      name: data.name,
+      name: data.name,                         // ✅ @JsonProperty("name")
       email: data.email,
       phone: data.phone,
       department: data.department,
-      aadhaarNumber: data.aadhaar,
+      aadhaarNumber: data.aadhaar,             // ✅ @JsonProperty("aadhaarNumber")
       collegeId: data.collegeId,
-      address: data.address
+      isCollegeHead: false,
+      address: data.address ? {
+        addressLine1: data.address.addressLine1,
+        village: data.address.village,
+        city: data.address.city,
+        state: data.address.state,
+        zip: data.address.zipCode,             // ✅ KEY FIX: zipCode → zip
+        country: data.address.country
+      } : null
     };
 
     const response = await api.post('/accounts/staff', payload);
@@ -457,13 +464,19 @@ export const CollegeService = {
 
   updateCPStaff: async (user: User, address: AddressFormData) => {
     const payload = {
-      username: user.username,
-      name: user.fullName,
+      name: user.fullName,                     // ✅ "name" not "fullName"
       email: user.email,
       phone: user.phone,
       department: user.department,
       aadhaarNumber: user.aadhaarNumber,
-      address,
+      address: address ? {
+        addressLine1: address.addressLine1,
+        village: address.village,
+        city: address.city,
+        state: address.state,
+        zip: address.zipCode,                  // ✅ KEY FIX: zipCode → zip
+        country: address.country
+      } : null,
       collegeId: user.collegeId,
       isCollegeHead: user.isCollegeHead || false,
     };

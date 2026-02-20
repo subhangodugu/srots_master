@@ -4,9 +4,10 @@ import { Layout } from './components/colleges/shared/ui/Layout';
 import { AdminPortal } from './pages/srots-user/AdminPortal';
 import { CPUserPortal } from './pages/cp-user/CPUserPortal';
 import { StudentPortal } from './pages/student/StudentPortal';
+import PremiumPage from './pages/PremiumPage';
 import { Role, User } from './types';
-import { 
-  Mail, Lock, Loader2, Eye, EyeOff, ShieldCheck, 
+import {
+  Mail, Lock, Loader2, Eye, EyeOff, ShieldCheck,
   UserCheck, GraduationCap, Terminal, Zap, ArrowLeft, Send, CheckCircle
 } from 'lucide-react';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -36,14 +37,14 @@ const App: React.FC = () => {
   // ────────────────────────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem('SROTS_AUTH_TOKEN');
-    
+
     // If no token but Redux thinks user is logged in → force logout
     if (!token && currentUser) {
       console.warn('No token found but user in Redux → forcing logout');
       dispatch(logout());
       navigate('/login', { replace: true });
     }
-    
+
     // If token exists but no user in Redux → try to restore (optional)
     if (token && !currentUser && !authLoading) {
       console.warn('Token exists but no user in Redux → redirect to login to re-auth');
@@ -127,14 +128,14 @@ const App: React.FC = () => {
               <h1 className="text-5xl font-black text-blue-600 tracking-tighter">Srots</h1>
               <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Campus Placement Engine</p>
             </div>
-            
+
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-xs font-black text-slate-500 uppercase ml-1">Identity Access</label>
                 <div className="relative group">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={20} />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Username or Institutional Email"
@@ -147,7 +148,7 @@ const App: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-xs font-black text-slate-500 uppercase">Secure Pin</label>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => { setShowForgotModal(true); setForgotSuccess(false); setForgotEmail(''); }}
                     className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
@@ -157,15 +158,15 @@ const App: React.FC = () => {
                 </div>
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors" size={20} />
-                  <input 
-                    type={showPassword ? "text" : "password"} 
+                  <input
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     className="w-full pl-12 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-medium text-slate-700"
                     disabled={authLoading}
                   />
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
@@ -181,7 +182,7 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              <button 
+              <button
                 type="submit"
                 disabled={authLoading}
                 className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-200 transition-all transform active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
@@ -196,7 +197,7 @@ const App: React.FC = () => {
               <ShieldCheck size={24} />
               <span className="text-[10px] font-black uppercase whitespace-nowrap">Super Admin</span>
             </button>
-            
+
             <button onClick={() => quickLogin('DEV_Praveen', 'DEV_PRAVEEN@8847')} className="bg-slate-800 hover:bg-slate-900 text-white p-4 rounded-2xl shadow-lg border border-slate-700 flex flex-col items-center gap-2 transition-all active:scale-95">
               <Terminal size={24} />
               <span className="text-[10px] font-black uppercase whitespace-nowrap">Srots Dev</span>
@@ -217,7 +218,7 @@ const App: React.FC = () => {
               <span className="text-[10px] font-black uppercase whitespace-nowrap">Student</span>
             </button>
           </div>
-          
+
           <Modal isOpen={showForgotModal} onClose={() => setShowForgotModal(false)} title="Account Recovery" maxWidth="max-w-sm">
             <div className="p-8">
               {forgotSuccess ? (
@@ -242,8 +243,8 @@ const App: React.FC = () => {
                     <label className="text-xs font-black text-slate-500 uppercase ml-1">Registered Email</label>
                     <div className="relative group">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500" size={18} />
-                      <input 
-                        type="email" 
+                      <input
+                        type="email"
                         required
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
@@ -253,7 +254,7 @@ const App: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
-                    <button 
+                    <button
                       type="submit"
                       disabled={isForgotSubmitting}
                       className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 flex items-center justify-center gap-2"
@@ -261,7 +262,7 @@ const App: React.FC = () => {
                       {isForgotSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                       Send Reset Link
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setShowForgotModal(false)}
                       className="w-full py-3 bg-white text-gray-500 font-bold hover:text-gray-700 flex items-center justify-center gap-1 text-sm"
@@ -293,16 +294,16 @@ const App: React.FC = () => {
         {/* Admin / SROTS_DEV */}
         <Route path="/admin/*" element={
           <ProtectedRoute allowedRoles={[Role.ADMIN, Role.SROTS_DEV]}>
-            <Layout 
-              user={currentUser} 
-              onNavigate={(view) => navigate(`/admin/${view}`)} 
+            <Layout
+              user={currentUser}
+              onNavigate={(view) => navigate(`/admin/${view}`)}
               currentView={location.pathname.split('/').pop() || 'profile'}
               onLogout={handleLogout}
             >
-              <AdminPortal 
-                view={location.pathname.split('/').pop() || 'profile'} 
-                user={currentUser} 
-                onUpdateUser={(u) => dispatch(updateUser(u))} 
+              <AdminPortal
+                view={location.pathname.split('/').pop() || 'profile'}
+                user={currentUser}
+                onUpdateUser={(u) => dispatch(updateUser(u))}
               />
             </Layout>
           </ProtectedRoute>
@@ -346,19 +347,19 @@ const App: React.FC = () => {
 
         <Route path="/cp/*" element={
           <ProtectedRoute allowedRoles={[Role.CPH, Role.STAFF]}>
-            <Layout 
-              user={currentUser} 
+            <Layout
+              user={currentUser}
               onNavigate={(view) => {
                 const prefix = 'cp';
                 navigate(`/${prefix}/${view}`);
-              }} 
+              }}
               currentView={location.pathname.split('/').pop() || 'jobs'}
               onLogout={handleLogout}
             >
-              <CPUserPortal 
-                view={location.pathname.split('/').pop() || 'jobs'} 
-                user={currentUser} 
-                onUpdateUser={(u) => dispatch(updateUser(u))} 
+              <CPUserPortal
+                view={location.pathname.split('/').pop() || 'jobs'}
+                user={currentUser}
+                onUpdateUser={(u) => dispatch(updateUser(u))}
               />
             </Layout>
           </ProtectedRoute>
@@ -366,20 +367,20 @@ const App: React.FC = () => {
 
         <Route path="/student/*" element={
           <ProtectedRoute allowedRoles={[Role.STUDENT]}>
-            <Layout 
-              user={currentUser} 
+            <Layout
+              user={currentUser}
               onNavigate={(view) => {
                 const prefix = 'student';
                 navigate(`/${prefix}/${view}`);
-              }} 
+              }}
               currentView={location.pathname.split('/').pop() || 'jobs'}
               onLogout={handleLogout}
             >
-              <StudentPortal 
-                view={location.pathname.split('/').pop() || 'jobs'} 
-                student={currentUser as any} 
-                onUpdateUser={(u) => dispatch(updateUser(u))} 
-              />
+              <Routes>
+                <Route path="jobs" element={<StudentPortal view="jobs" student={currentUser as any} onUpdateUser={(u) => dispatch(updateUser(u))} />} />
+                <Route path="premium" element={<PremiumPage />} />
+                <Route path="*" element={<StudentPortal view={location.pathname.split('/').pop() || 'jobs'} student={currentUser as any} onUpdateUser={(u) => dispatch(updateUser(u))} />} />
+              </Routes>
             </Layout>
           </ProtectedRoute>
         } />
@@ -389,7 +390,7 @@ const App: React.FC = () => {
           About {college.name} {isCPH && <Sparkles className="text-amber-400" size={24} />}
         </h2> */}
 
-        
+
 
         <Route path="/unauthorized" element={<div className="min-h-screen flex items-center justify-center text-2xl font-bold text-red-600">Access Denied</div>} />
         <Route path="*" element={<Navigate to={getDefaultDashboard(currentUser.role)} replace />} />

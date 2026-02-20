@@ -47,3 +47,4 @@ ehthumbs.db
 # App specific
 uploads/
 srots-backend/uploads/
+srots-backend/run_*.txt
