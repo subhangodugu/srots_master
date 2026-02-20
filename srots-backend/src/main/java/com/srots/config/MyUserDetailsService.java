@@ -30,9 +30,11 @@ public class MyUserDetailsService implements UserDetailsService {
 		// \u2705 Block Login When HOLD
 		if (user.getRole() == User.Role.STUDENT) {
 			com.srots.model.Student student = studentRepository.findById(user.getId()).orElse(null);
-			String status = student.getAccountStatus();
-			if (status != null && "HOLD".equalsIgnoreCase(status)) {
-				throw new LockedException("Account on HOLD. Please recharge premium.");
+			if (student != null) {
+				String status = student.getAccountStatus();
+				if (status != null && "HOLD".equalsIgnoreCase(status)) {
+					throw new LockedException("Account on HOLD. Please recharge premium.");
+				}
 			}
 		}
 
