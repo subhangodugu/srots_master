@@ -29,7 +29,7 @@ public class MyUserDetailsService implements UserDetailsService {
 
 		// \u2705 Block Login When HOLD
 		if (user.getRole() == User.Role.STUDENT) {
-			com.srots.model.Student student = studentRepository.findById(user.getId()).orElse(null);
+			com.srots.model.Student student = studentRepository.findByUserId(user.getId()).orElse(null);
 			if (student == null) {
 				// Lazy-create for legacy students
 				student = new com.srots.model.Student();

@@ -8,4 +8,6 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     List<Student> findByCollegeId(String collegeId);
 
     List<Student> findByPremiumActiveTrueAndPremiumExpiryDateIsNotNull();
+
+    java.util.Optional<Student> findByUserId(String userId);
 }

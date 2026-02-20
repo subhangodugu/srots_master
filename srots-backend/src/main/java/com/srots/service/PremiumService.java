@@ -21,10 +21,10 @@ public class PremiumService {
             String studentId,
             com.srots.dto.PremiumSubscribeRequestDTO dto) {
 
-        Student student = studentRepository.findById(studentId)
+        Student student = studentRepository.findByUserId(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        // \u2705 Validate UTR
+        // ✅ Validate UTR
         if (dto.getUtr() == null || dto.getUtr().isBlank() || dto.getUtr().trim().length() < 10) {
             throw new RuntimeException("Invalid UTR. Must be at least 10 characters.");
         }

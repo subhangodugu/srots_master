@@ -185,7 +185,8 @@ public class UserAccountServiceImpl implements UserAccountService {
 		// NEW: Persist Student entity for premium/status tracking
 		if (role == User.Role.STUDENT) {
 			com.srots.model.Student student = new com.srots.model.Student();
-			student.setId(savedUser.getId());
+			student.setId(java.util.UUID.randomUUID().toString());
+			student.setUserId(savedUser.getId());
 			student.setName(savedUser.getFullName());
 			student.setEmail(savedUser.getEmail());
 			student.setCollegeId(college != null ? college.getId() : null);
@@ -296,10 +297,11 @@ public class UserAccountServiceImpl implements UserAccountService {
 
 		// NEW: Ensure Student entity exists for premium/status tracking (Lazy-create)
 		if (savedUser.getRole() == User.Role.STUDENT) {
-			com.srots.model.Student student = studentRepository.findById(savedUser.getId())
+			com.srots.model.Student student = studentRepository.findByUserId(savedUser.getId())
 					.orElse(new com.srots.model.Student());
 			if (student.getId() == null) {
-				student.setId(savedUser.getId());
+				student.setId(java.util.UUID.randomUUID().toString());
+				student.setUserId(savedUser.getId());
 				student.setCreatedAt(java.time.LocalDateTime.now());
 			}
 			student.setName(savedUser.getFullName());
