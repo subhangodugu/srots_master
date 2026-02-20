@@ -58,6 +58,9 @@ public class UserAccountServiceImpl implements UserAccountService {
 	private StudentProfileRepository studentProfileRepository;
 
 	@Autowired
+	private com.srots.repository.StudentRepository studentRepository;
+
+	@Autowired
 	private EducationRecordRepository educationRepository;
 
 	@Autowired
@@ -179,6 +182,17 @@ public class UserAccountServiceImpl implements UserAccountService {
 
 		User savedUser = userRepository.save(user);
 
+		// NEW: Persist Student entity for premium/status tracking
+		if (role == User.Role.STUDENT) {
+			com.srots.model.Student student = new com.srots.model.Student();
+			student.setId(savedUser.getId());
+			student.setName(savedUser.getFullName());
+			student.setEmail(savedUser.getEmail());
+			student.setCollegeId(college != null ? college.getId() : null);
+			student.setCreatedAt(java.time.LocalDateTime.now());
+			studentRepository.save(student);
+		}
+
 		if (role == User.Role.STUDENT && dto.getStudentProfile() != null) {
 			saveEducationHistory(savedUser, dto.getStudentProfile());
 		}
@@ -279,6 +293,20 @@ public class UserAccountServiceImpl implements UserAccountService {
 		}
 
 		User savedUser = userRepository.save(user);
+
+		// NEW: Ensure Student entity exists for premium/status tracking (Lazy-create)
+		if (savedUser.getRole() == User.Role.STUDENT) {
+			com.srots.model.Student student = studentRepository.findById(savedUser.getId())
+					.orElse(new com.srots.model.Student());
+			if (student.getId() == null) {
+				student.setId(savedUser.getId());
+				student.setCreatedAt(java.time.LocalDateTime.now());
+			}
+			student.setName(savedUser.getFullName());
+			student.setEmail(savedUser.getEmail());
+			student.setCollegeId(savedUser.getCollege() != null ? savedUser.getCollege().getId() : null);
+			studentRepository.save(student);
+		}
 
 		return (savedUser.getRole() == User.Role.STUDENT) ? getFullUserProfile(savedUser.getId()) : savedUser;
 	}
