@@ -81,7 +81,9 @@ export const login = (credentials: { username: string; password?: string }) => a
     dispatch(loginSuccess(user));
   } catch (err: any) {
     console.error('Authentication Error:', err);
-    const errorMessage = err.response?.data?.message || 'Login failed. Please check your credentials.';
+    const errorMessage = typeof err.response?.data === 'string'
+      ? err.response.data
+      : (err.response?.data?.message || 'Login failed. Please check your credentials.');
     dispatch(loginFailure(errorMessage));
   }
 };

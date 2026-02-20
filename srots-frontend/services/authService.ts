@@ -18,12 +18,13 @@ export const AuthService = {
       fullName: data.fullName,
       role: data.role as Role,
       collegeId: data.collegeId || null,
+      accountStatus: data.accountStatus,
       token: data.token,
       avatar: data.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.fullName)}&background=0D8ABC&color=fff`,
-      
+
       isRestricted: data.isRestricted || false,
       isCollegeHead: data.isCollegeHead || false,
-      
+
       phone: data.phone,
       alternativeEmail: data.alternativeEmail,
       alternativePhone: data.alternativePhone,
@@ -32,17 +33,17 @@ export const AuthService = {
       department: data.department,
       experience: data.experience,
       education: data.education,
-      
+
       address: data.addressJson ? JSON.parse(data.addressJson) : null,
       fullAddress: data.addressJson ? JSON.parse(data.addressJson).fullAddress : undefined,
-      
+
       resetToken: data.resetToken,
       tokenExpiry: data.tokenExpiry,
       lastDeviceInfo: data.lastDeviceInfo,
-      
+
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
-      
+
       educationRecords: data.educationRecords || null,
       experiences: data.experiences || null,
       projects: data.projects || null,
@@ -74,10 +75,10 @@ export const AuthService = {
       avatar: data.avatarUrl || '',
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
-      
+
       isRestricted: data.isRestricted || false,
       isCollegeHead: data.isCollegeHead || false,
-      
+
       phone: data.phone,
       alternativeEmail: data.alternativeEmail,
       alternativePhone: data.alternativePhone,
@@ -86,14 +87,14 @@ export const AuthService = {
       department: data.department,
       experience: data.experience,
       education: data.education,
-      
+
       address: data.addressJson ? JSON.parse(data.addressJson) : null,
       fullAddress: data.addressJson ? JSON.parse(data.addressJson).fullAddress : undefined,
-      
+
       resetToken: data.resetToken,
       tokenExpiry: data.tokenExpiry,
       lastDeviceInfo: data.lastDeviceInfo,
-      
+
       educationRecords: data.educationRecords || null,
       experiences: data.experiences || null,
       projects: data.projects || null,

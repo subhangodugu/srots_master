@@ -431,6 +431,7 @@ export interface User {
   fullName: string;
   role: Role;
   collegeId?: string | null;
+  accountStatus?: string;
   token?: string;
   avatar?: string;
   createdAt?: string;
